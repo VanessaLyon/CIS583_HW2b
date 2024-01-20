@@ -24,23 +24,6 @@ else:
 """
 
 def is_ordered_block(block_num):
-    
-Certainly! We'll modify the code to handle both pre-London Hard Fork and post-London Hard Fork cases. In the pre-London Hard Fork case, it will check the gasPrice attribute, and in the post-London Hard Fork case, it will consider the max_priority_fee_per_gas. Here's the updated code:
-
-python
-Copy code
-from web3 import Web3
-
-rpc_url = "https://eth-mainnet.alchemyapi.io/v2/7R8FD0Z9VuycQYgASfO5xsfAPsK21DJW"
-w3 = Web3(Web3.HTTPProvider(rpc_url))
-
-if w3.is_connected():
-    pass
-else:
-    print("Failed to connect to Ethereum node!")
-
-
-def is_ordered_block(block_num):
     block = w3.eth.get_block(block_num)
     ordered = False
 
