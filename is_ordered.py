@@ -2,16 +2,13 @@ from web3 import Web3
 import random
 import json
 
-
 rpc_url = "https://eth-mainnet.alchemyapi.io/v2/7R8FD0Z9VuycQYgASfO5xsfAPsK21DJW"
 w3 = Web3(Web3.HTTPProvider(rpc_url))
-
 
 if w3.is_connected():
 	pass
 else:
 	print( "Failed to connect to Ethereum node!" )
-
 
 """
 	Takes a block number
@@ -33,9 +30,9 @@ def is_ordered_block(block_num):
     if block_num <= 12965000:  # Pre-London Hard Fork
         ordered = all(
             (
-                (tx.gas_price if isinstance(tx, HexBytes) else tx.gas_price)
+                (tx.gas_price if isinstance(tx, str) else tx.gas_price)
                 >=
-                (tx2.gas_price if isinstance(tx2, HexBytes) else tx2.gas_price)
+                (tx2.gas_price if isinstance(tx2, str) else tx2.gas_price)
             )
             for tx, tx2 in zip(block.transactions[:-1], block.transactions[1:])
         )
@@ -49,14 +46,15 @@ def is_ordered_block(block_num):
                          tx2.get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas)
                     )
                     if isinstance(tx, dict) and isinstance(tx2, dict)
-                    else (tx.gas_price if isinstance(tx, HexBytes) else tx.gas_price) >=
-                         (tx2.gas_price if isinstance(tx2, HexBytes) else tx2.gas_price)
+                    else (tx.gas_price if isinstance(tx, str) else tx.gas_price) >=
+                         (tx2.gas_price if isinstance(tx2, str) else tx2.gas_price)
                 )
             )
             for tx, tx2 in zip(block.transactions[:-1], block.transactions[1:])
         )
 
     return ordered
+
 
 """
 	This might be useful for testing
