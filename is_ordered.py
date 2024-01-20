@@ -26,12 +26,31 @@ else:
 	Conveniently, most type 2 transactions set the gasPrice field to be min( tx.maxPriorityFeePerGas + block.baseFeePerGas, tx.maxFeePerGas )
 """
 
+
+I appreciate your patience. The error you're encountering may be related to the fact that gas prices or other properties of a transaction might be None in some cases. To handle this, we should add additional checks to ensure we only compare valid values. Here's the updated code:
+
+python
+Copy code
+from web3 import Web3
+import random
+import json
+
+rpc_url = "https://eth-mainnet.alchemyapi.io/v2/7R8FD0Z9VuycQYgASfO5xsfAPsK21DJW"
+w3 = Web3(Web3.HTTPProvider(rpc_url))
+
+if w3.is_connected():
+    pass
+else:
+    print("Failed to connect to Ethereum node!")
+
 def is_ordered_block(block_num):
     block = w3.eth.get_block(block_num)
     ordered = False
 
     if block_num <= 12965000:  # Pre-London Hard Fork
         ordered = all(
+            w3.eth.get_transaction(tx.hex).gas_price is not None and
+            w3.eth.get_transaction(tx2.hex).gas_price is not None and
             w3.eth.get_transaction(tx.hex).gas_price >= w3.eth.get_transaction(tx2.hex).gas_price
             for tx, tx2 in zip(block.transactions[:-1], block.transactions[1:])
         )
@@ -39,11 +58,11 @@ def is_ordered_block(block_num):
         ordered = all(
             (
                 (
-                    (tx.max_priority_fee_per_gas + block.base_fee_per_gas)
-                    <= (tx2.max_priority_fee_per_gas + block.base_fee_per_gas)
+                    (tx.max_priority_fee_per_gas is not None and tx2.max_priority_fee_per_gas is not None and
+                     tx.max_priority_fee_per_gas + block.base_fee_per_gas <= tx2.max_priority_fee_per_gas + block.base_fee_per_gas)
+                    if tx.type == 2 and tx2.type == 2
+                    else (tx.gas_price is not None and tx2.gas_price is not None and tx.gas_price >= tx2.gas_price)
                 )
-                if tx.type == 2 and tx2.type == 2
-                else tx.gas_price >= tx2.gas_price
             )
             for tx, tx2 in zip(block.transactions[:-1], block.transactions[1:])
         )
