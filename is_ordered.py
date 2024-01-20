@@ -60,10 +60,13 @@ def is_ordered_block(block_num):
     ordered = False
 
     if block.transactions:
-        ordered = all(
-            block.transactions[i]["gas_price"] >= block.transactions[i + 1]["gas_price"]
-            for i in range(len(block.transactions) - 1)
-        )
+        try:
+            ordered = all(
+                tx["gas_price"] >= block.transactions[i + 1]["gas_price"]
+                for i, tx in enumerate(block.transactions[:-1])
+            )
+        except (TypeError, KeyError):
+            print("Error: Unable to retrieve gas price from transactions.")
 
     return ordered
 
