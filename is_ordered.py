@@ -39,11 +39,14 @@ def is_ordered_block(block_num):
         ordered = all(
             (
                 (
-                    (tx.max_priority_fee_per_gas + block.base_fee_per_gas)
-                    <= (tx2.max_priority_fee_per_gas + block.base_fee_per_gas)
+                    (
+                        (tx.get("type") == 2 and tx2.get("type") == 2 and
+                         tx.get("max_priority_fee_per_gas") + block.base_fee_per_gas <=
+                         tx2.get("max_priority_fee_per_gas") + block.base_fee_per_gas)
+                    )
+                    if isinstance(tx, dict) and isinstance(tx2, dict)
+                    else (tx.gas_price >= tx2.gas_price)
                 )
-                if tx.type == 2 and tx2.type == 2
-                else tx.gas_price >= tx2.gas_price
             )
             for tx, tx2 in zip(block.transactions[:-1], block.transactions[1:])
         )
