@@ -25,24 +25,6 @@ else:
 
 	Conveniently, most type 2 transactions set the gasPrice field to be min( tx.maxPriorityFeePerGas + block.baseFeePerGas, tx.maxFeePerGas )
 """
-
-
-I appreciate your patience. The error you're encountering may be related to the fact that gas prices or other properties of a transaction might be None in some cases. To handle this, we should add additional checks to ensure we only compare valid values. Here's the updated code:
-
-python
-Copy code
-from web3 import Web3
-import random
-import json
-
-rpc_url = "https://eth-mainnet.alchemyapi.io/v2/7R8FD0Z9VuycQYgASfO5xsfAPsK21DJW"
-w3 = Web3(Web3.HTTPProvider(rpc_url))
-
-if w3.is_connected():
-    pass
-else:
-    print("Failed to connect to Ethereum node!")
-
 def is_ordered_block(block_num):
     block = w3.eth.get_block(block_num)
     ordered = False
