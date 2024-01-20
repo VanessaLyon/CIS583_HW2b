@@ -32,7 +32,7 @@ def is_ordered_block(block_num):
 
     if block_num <= 12965000:  # Pre-London Hard Fork
         ordered = all(
-            w3.eth.get_transaction(tx.hash).gas_price >= w3.eth.get_transaction(tx2.hash).gas_price
+            w3.eth.get_transaction(tx.hex).gas_price >= w3.eth.get_transaction(tx2.hex).gas_price
             for tx, tx2 in zip(block.transactions[:-1], block.transactions[1:])
         )
     else:  # Post-London Hard Fork (EIP-1559)
