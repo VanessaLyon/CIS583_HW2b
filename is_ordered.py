@@ -25,14 +25,13 @@ else:
 
 	Conveniently, most type 2 transactions set the gasPrice field to be min( tx.maxPriorityFeePerGas + block.baseFeePerGas, tx.maxFeePerGas )
 """
+
 def is_ordered_block(block_num):
     block = w3.eth.get_block(block_num)
     ordered = False
 
     if block_num <= 12965000:  # Pre-London Hard Fork
         ordered = all(
-            w3.eth.get_transaction(tx.hex).gas_price is not None and
-            w3.eth.get_transaction(tx2.hex).gas_price is not None and
             w3.eth.get_transaction(tx.hex).gas_price >= w3.eth.get_transaction(tx2.hex).gas_price
             for tx, tx2 in zip(block.transactions[:-1], block.transactions[1:])
         )
@@ -40,11 +39,11 @@ def is_ordered_block(block_num):
         ordered = all(
             (
                 (
-                    (tx.max_priority_fee_per_gas is not None and tx2.max_priority_fee_per_gas is not None and
-                     tx.max_priority_fee_per_gas + block.base_fee_per_gas <= tx2.max_priority_fee_per_gas + block.base_fee_per_gas)
-                    if tx.type == 2 and tx2.type == 2
-                    else (tx.gas_price is not None and tx2.gas_price is not None and tx.gas_price >= tx2.gas_price)
+                    (tx.max_priority_fee_per_gas + block.base_fee_per_gas)
+                    <= (tx2.max_priority_fee_per_gas + block.base_fee_per_gas)
                 )
+                if tx.type == 2 and tx2.type == 2
+                else tx.gas_price >= tx2.gas_price
             )
             for tx, tx2 in zip(block.transactions[:-1], block.transactions[1:])
         )
