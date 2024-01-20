@@ -26,11 +26,6 @@ else:
 	Conveniently, most type 2 transactions set the gasPrice field to be min( tx.maxPriorityFeePerGas + block.baseFeePerGas, tx.maxFeePerGas )
 """
 
-def hexbytes_to_dict(hexbytes):
-    if isinstance(hexbytes, w3.HexBytes):
-        return dict(hexbytes)
-    return hexbytes
-
 def is_ordered_block(block_num):
     block = w3.eth.get_block(block_num)
     ordered = False
@@ -38,9 +33,9 @@ def is_ordered_block(block_num):
     if block_num <= 12965000:  # Pre-London Hard Fork
         ordered = all(
             (
-                (hexbytes_to_dict(tx).get("gas_price", 0) if isinstance(tx, w3.HexBytes) else tx.gas_price)
+                (tx.gas_price if isinstance(tx, HexBytes) else tx.gas_price)
                 >=
-                (hexbytes_to_dict(tx2).get("gas_price", 0) if isinstance(tx2, w3.HexBytes) else tx2.gas_price)
+                (tx2.gas_price if isinstance(tx2, HexBytes) else tx2.gas_price)
             )
             for tx, tx2 in zip(block.transactions[:-1], block.transactions[1:])
         )
@@ -49,12 +44,13 @@ def is_ordered_block(block_num):
             (
                 (
                     (
-                        (hexbytes_to_dict(tx).get("type") == 2 and hexbytes_to_dict(tx2).get("type") == 2 and
-                         hexbytes_to_dict(tx).get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas <=
-                         hexbytes_to_dict(tx2).get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas)
+                        (tx.get("type") == 2 and tx2.get("type") == 2 and
+                         tx.get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas <=
+                         tx2.get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas)
                     )
-                    if isinstance(tx, w3.HexBytes) and isinstance(tx2, w3.HexBytes)
-                    else (hexbytes_to_dict(tx).get("gas_price", 0) >= hexbytes_to_dict(tx2).get("gas_price", 0))
+                    if isinstance(tx, dict) and isinstance(tx2, dict)
+                    else (tx.gas_price if isinstance(tx, HexBytes) else tx.gas_price) >=
+                         (tx2.gas_price if isinstance(tx2, HexBytes) else tx2.gas_price)
                 )
             )
             for tx, tx2 in zip(block.transactions[:-1], block.transactions[1:])
