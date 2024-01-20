@@ -23,37 +23,22 @@ else:
 	Conveniently, most type 2 transactions set the gasPrice field to be min( tx.maxPriorityFeePerGas + block.baseFeePerGas, tx.maxFeePerGas )
 """
 
-def is_ordered_block2(block_num):
-    block = w3.eth.get_block(block_num)
-    ordered = False
+def is_ordered_block(block_num):
+    
+Certainly! We'll modify the code to handle both pre-London Hard Fork and post-London Hard Fork cases. In the pre-London Hard Fork case, it will check the gasPrice attribute, and in the post-London Hard Fork case, it will consider the max_priority_fee_per_gas. Here's the updated code:
 
-    if block_num <= 12965000:  # Pre-London Hard Fork
-        ordered = all(
-            (
-                (tx.gas_price if isinstance(tx, str) else tx.gas_price)
-                >=
-                (tx2.gas_price if isinstance(tx2, str) else tx2.gas_price)
-            )
-            for tx, tx2 in zip(block.transactions[:-1], block.transactions[1:])
-        )
-    else:  # Post-London Hard Fork (EIP-1559)
-        ordered = all(
-            (
-                (
-                    (
-                        (tx.get("type") == 2 and tx2.get("type") == 2 and
-                         tx.get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas <=
-                         tx2.get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas)
-                    )
-                    if isinstance(tx, dict) and isinstance(tx2, dict)
-                    else (tx.gas_price if isinstance(tx, str) else tx.gas_price) >=
-                         (tx2.gas_price if isinstance(tx2, str) else tx2.gas_price)
-                )
-            )
-            for tx, tx2 in zip(block.transactions[:-1], block.transactions[1:])
-        )
+python
+Copy code
+from web3 import Web3
 
-    return ordered
+rpc_url = "https://eth-mainnet.alchemyapi.io/v2/7R8FD0Z9VuycQYgASfO5xsfAPsK21DJW"
+w3 = Web3(Web3.HTTPProvider(rpc_url))
+
+if w3.is_connected():
+    pass
+else:
+    print("Failed to connect to Ethereum node!")
+
 
 def is_ordered_block(block_num):
     block = w3.eth.get_block(block_num)
@@ -61,10 +46,21 @@ def is_ordered_block(block_num):
 
     if block.transactions:
         try:
-            ordered = all(
-                tx["gas_price"] >= block.transactions[i + 1]["gas_price"]
-                for i, tx in enumerate(block.transactions[:-1])
-            )
+            if block_num <= 12965000:  # Pre-London Hard Fork
+                ordered = all(
+                    tx["gas_price"] >= block.transactions[i + 1]["gas_price"]
+                    for i, tx in enumerate(block.transactions[:-1])
+                )
+            else:  # Post-London Hard Fork
+                ordered = all(
+                    (
+                        tx.get("max_priority_fee_per_gas", 0) +
+                        block.base_fee_per_gas
+                        >= block.transactions[i + 1].get("max_priority_fee_per_gas", 0) +
+                        block.base_fee_per_gas
+                    )
+                    for i, tx in enumerate(block.transactions[:-1])
+                )
         except (TypeError, KeyError):
             print("Error: Unable to retrieve gas price from transactions.")
 
