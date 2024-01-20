@@ -23,22 +23,6 @@ else:
 	Conveniently, most type 2 transactions set the gasPrice field to be min( tx.maxPriorityFeePerGas + block.baseFeePerGas, tx.maxFeePerGas )
 """
 
-
-I apologize for the confusion. It appears there might be an issue with the gas price retrieval or the logic for ordering. Let's refine the code further:
-
-python
-Copy code
-from web3 import Web3
-
-rpc_url = "https://eth-mainnet.alchemyapi.io/v2/7R8FD0Z9VuycQYgASfO5xsfAPsK21DJW"
-w3 = Web3(Web3.HTTPProvider(rpc_url))
-
-if w3.is_connected():
-    pass
-else:
-    print("Failed to connect to Ethereum node!")
-
-
 def is_ordered_block(block_num):
     block = w3.eth.get_block(block_num)
     ordered = False
