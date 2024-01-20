@@ -33,9 +33,9 @@ def is_ordered_block(block_num):
     if block_num <= 12965000:  # Pre-London Hard Fork
         ordered = all(
             (
-                (getattr(tx, "gas_price", 0) if isinstance(tx, (dict, AttributeDict)) else tx.gas_price)
+                (getattr(tx, "gas_price", 0) if isinstance(tx, dict) else tx.gas_price)
                 >=
-                (getattr(tx2, "gas_price", 0) if isinstance(tx2, (dict, AttributeDict)) else tx2.gas_price)
+                (getattr(tx2, "gas_price", 0) if isinstance(tx2, dict) else tx2.gas_price)
             )
             for tx, tx2 in zip(block.transactions[:-1], block.transactions[1:])
         )
@@ -48,7 +48,7 @@ def is_ordered_block(block_num):
                          tx.get("max_priority_fee_per_gas") + block.base_fee_per_gas <=
                          tx2.get("max_priority_fee_per_gas") + block.base_fee_per_gas)
                     )
-                    if isinstance(tx, (dict, AttributeDict)) and isinstance(tx2, (dict, AttributeDict))
+                    if isinstance(tx, dict) and isinstance(tx2, dict)
                     else (tx.gas_price >= tx2.gas_price)
                 )
             )
