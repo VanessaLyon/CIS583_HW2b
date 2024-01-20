@@ -61,7 +61,7 @@ def is_ordered_block(block_num):
 
     if block.transactions:
         ordered = all(
-            block.transactions[i]["gasPrice"] >= block.transactions[i + 1]["gasPrice"]
+            block.transactions[i]["gas_price"] >= block.transactions[i + 1]["gas_price"]
             for i in range(len(block.transactions) - 1)
         )
 
