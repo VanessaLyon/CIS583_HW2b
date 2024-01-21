@@ -23,13 +23,14 @@ else:
 	Conveniently, most type 2 transactions set the gasPrice field to be min( tx.maxPriorityFeePerGas + block.baseFeePerGas, tx.maxFeePerGas )
 """
 
+
 def is_ordered_block(block_num):
     block = w3.eth.get_block(block_num)
     ordered = False
 
     if block_num <= 12965000:  # Pre-London Hard Fork
         ordered = all(
-            tx.get("gas_price", 0) >= block.transactions[i + 1].get("gas_price", 0)
+            tx["gas_price"] >= block.transactions[i + 1]["gas_price"]
             for i, tx in enumerate(block.transactions[:-1])
         )
     else:  # Post-London Hard Fork (EIP-1559)
@@ -42,8 +43,8 @@ def is_ordered_block(block_num):
                     block.transactions[i + 1].get("max_priority_fee_per_gas", 0) +
                     block.base_fee_per_gas
                 )
-                if tx.get("type") == 2 and block.transactions[i + 1].get("type") == 2
-                else tx.get("gas_price", 0) >= block.transactions[i + 1].get("gas_price", 0)
+                if tx["type"] == 2 and block.transactions[i + 1]["type"] == 2
+                else tx["gas_price"] >= block.transactions[i + 1]["gas_price"]
             )
             for i, tx in enumerate(block.transactions[:-1])
         )
