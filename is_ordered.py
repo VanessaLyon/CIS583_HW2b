@@ -30,11 +30,11 @@ def is_ordered_block(block_num):
     if block_num <= 12965000:  # Pre-London Hard Fork
         ordered = all(
             (
-                tx["gas_price"] if isinstance(tx, dict) else dict(tx)["gas_price"]
+                (tx["gas_price"],) if isinstance(tx, dict) else (dict(tx)["gas_price"],)
             ) >= (
-                block.transactions[i + 1]["gas_price"]
+                (block.transactions[i + 1]["gas_price"],)
                 if isinstance(block.transactions[i + 1], dict)
-                else dict(block.transactions[i + 1])["gas_price"]
+                else (dict(block.transactions[i + 1])["gas_price"],)
             )
             for i, tx in enumerate(block.transactions[:-1])
         )
@@ -42,23 +42,26 @@ def is_ordered_block(block_num):
         ordered = all(
             (
                 (
-                    tx.get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas
+                    tx.get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas,
                 )
                 if isinstance(tx, dict)
-                else dict(tx).get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas
+                else (dict(tx).get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas,)
             ) >= (
                 (
                     block.transactions[i + 1].get("max_priority_fee_per_gas", 0) +
-                    block.base_fee_per_gas
+                    block.base_fee_per_gas,
                 )
                 if isinstance(block.transactions[i + 1], dict)
-                else dict(block.transactions[i + 1]).get("max_priority_fee_per_gas", 0) +
-                block.base_fee_per_gas
+                else (
+                    dict(block.transactions[i + 1]).get("max_priority_fee_per_gas", 0) +
+                    block.base_fee_per_gas,
+                )
             )
             for i, tx in enumerate(block.transactions[:-1])
         )
 
     return ordered
+
 
 
 
