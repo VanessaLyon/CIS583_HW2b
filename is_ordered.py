@@ -52,10 +52,8 @@ def is_ordered_block(block_num):
                     block.base_fee_per_gas
                 )
                 if isinstance(block.transactions[i + 1], dict)
-                else (
-                    dict(block.transactions[i + 1]).get("max_priority_fee_per_gas", 0) +
-                    block.base_fee_per_gas
-                )
+                else dict(block.transactions[i + 1]).get("max_priority_fee_per_gas", 0) +
+                block.base_fee_per_gas
             )
             for i, tx in enumerate(block.transactions[:-1])
         )
