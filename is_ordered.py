@@ -38,40 +38,36 @@ def is_ordered_block(block_num):
     block = w3.eth.get_block(block_num)
     ordered = False
 
-    if block.transactions:
-        try:
-            if block_num <= 12965000:  # Pre-London Hard Fork
-                ordered = all(
-                    (
-                        tx["gas_price"] if isinstance(tx, dict) else dict(tx)["gas_price"]
-                    ) >= (
-                        block.transactions[i + 1]["gas_price"]
-                        if isinstance(block.transactions[i + 1], dict)
-                        else dict(block.transactions[i + 1])["gas_price"]
-                    )
-                    for i, tx in enumerate(block.transactions[:-1])
+        if block_num <= 12965000:  # Pre-London Hard Fork
+        ordered = all(
+                (
+                tx["gas_price"] if isinstance(tx, dict) else dict(tx)["gas_price"]
+                ) >= (
+                block.transactions[i + 1]["gas_price"]
+                if isinstance(block.transactions[i + 1], dict)
+                else dict(block.transactions[i + 1])["gas_price"]
                 )
-            else:  # Post-London Hard Fork
-                ordered = all(
-                    (
-                        (
-                            tx.get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas
-                        )
-                        if isinstance(tx, dict)
-                        else dict(tx).get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas
-                    ) >= (
-                        (
-                            block.transactions[i + 1].get("max_priority_fee_per_gas", 0) +
-                            block.base_fee_per_gas
-                        )
-                        if isinstance(block.transactions[i + 1], dict)
-                        else dict(block.transactions[i + 1]).get("max_priority_fee_per_gas", 0) +
+                for i, tx in enumerate(block.transactions[:-1])
+        )
+        else:  # Post-London Hard Fork
+        ordered = all(
+                (
+                (
+                        tx.get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas
+                )
+                if isinstance(tx, dict)
+                else dict(tx).get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas
+                ) >= (
+                (
+                        block.transactions[i + 1].get("max_priority_fee_per_gas", 0) +
                         block.base_fee_per_gas
-                    )
-                    for i, tx in enumerate(block.transactions[:-1])
                 )
-        except (TypeError, KeyError):
-            print("Error: Unable to retrieve gas price from transactions.")
+                if isinstance(block.transactions[i + 1], dict)
+                else dict(block.transactions[i + 1]).get("max_priority_fee_per_gas", 0) +
+                block.base_fee_per_gas
+                )
+                for i, tx in enumerate(block.transactions[:-1])
+        )
 
     return ordered
 
