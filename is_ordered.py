@@ -28,29 +28,28 @@ def is_ordered_block(block_num):
     ordered = False
 
     if block_num <= 12965000:  # Pre-London Hard Fork
-        transactions_list = list(block.transactions)
         ordered = all(
-            tx["gas_price"] >= transactions_list[i + 1]["gas_price"]
-            for i, tx in enumerate(transactions_list[:-1])
+            tx["gas_price"] >= block.transactions[i + 1]["gas_price"]
+            for i, tx in enumerate(block.transactions[:-1])
         )
     else:  # Post-London Hard Fork (EIP-1559)
-        transactions_list = list(block.transactions)
         ordered = all(
             (
                 (
                     tx.get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas
                 )
                 <= (
-                    transactions_list[i + 1].get("max_priority_fee_per_gas", 0) +
+                    block.transactions[i + 1].get("max_priority_fee_per_gas", 0) +
                     block.base_fee_per_gas
                 )
-                if tx["type"] == 2 and transactions_list[i + 1]["type"] == 2
-                else tx["gas_price"] >= transactions_list[i + 1]["gas_price"]
+                if tx["type"] == 2 and block.transactions[i + 1]["type"] == 2
+                else tx["gas_price"] >= block.transactions[i + 1]["gas_price"]
             )
-            for i, tx in enumerate(transactions_list[:-1])
+            for i, tx in enumerate(block.transactions[:-1])
         )
 
     return ordered
+
 
 """
 	This might be useful for testing
