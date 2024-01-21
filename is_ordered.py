@@ -29,7 +29,7 @@ def is_ordered_block(block_num):
 
     if block_num <= 12965000:  # Pre-London Hard Fork
         ordered = all(
-            tx["gas_price"] >= block.transactions[i + 1]["gas_price"]
+            tx.get("gas_price", 0) >= block.transactions[i + 1].get("gas_price", 0)
             for i, tx in enumerate(block.transactions[:-1])
         )
     else:  # Post-London Hard Fork (EIP-1559)
@@ -42,8 +42,8 @@ def is_ordered_block(block_num):
                     block.transactions[i + 1].get("max_priority_fee_per_gas", 0) +
                     block.base_fee_per_gas
                 )
-                if tx["type"] == 2 and block.transactions[i + 1]["type"] == 2
-                else tx["gas_price"] >= block.transactions[i + 1]["gas_price"]
+                if tx.get("type") == 2 and block.transactions[i + 1].get("type") == 2
+                else tx.get("gas_price", 0) >= block.transactions[i + 1].get("gas_price", 0)
             )
             for i, tx in enumerate(block.transactions[:-1])
         )
