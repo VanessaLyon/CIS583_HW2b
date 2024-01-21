@@ -2,50 +2,39 @@ from web3 import Web3
 import random
 import json
 
+
 rpc_url = "https://eth-mainnet.alchemyapi.io/v2/7R8FD0Z9VuycQYgASfO5xsfAPsK21DJW"
 w3 = Web3(Web3.HTTPProvider(rpc_url))
 
 if w3.is_connected():
-	pass
+    pass
 else:
-	print( "Failed to connect to Ethereum node!" )
+    print("Failed to connect to Ethereum node!")
 
-"""
-	Takes a block number
-	Returns a boolean that tells whether all the transactions in the block are ordered by priority fee
-
-	Before EIP-1559, a block is ordered if and only if all transactions are sorted in decreasing order of the gasPrice field
-
-	After EIP-1559, there are two types of transactions
-		*Type 0* The priority fee is tx.gasPrice - block.baseFeePerGas
-		*Type 2* The priority fee is min( tx.maxPriorityFeePerGas, tx.maxFeePerGas - block.baseFeePerGas )
-
-	Conveniently, most type 2 transactions set the gasPrice field to be min( tx.maxPriorityFeePerGas + block.baseFeePerGas, tx.maxFeePerGas )
-"""
 
 def is_ordered_block(block_num):
     block = w3.eth.get_block(block_num)
     ordered = False
-
+    transactions = [w3.eth.get_transaction(tx_hash) for tx_hash in block.transactions]
     if block_num <= 12965000:  # Pre-London Hard Fork
         ordered = all(
-            tx["gas_price"] >= block.transactions[i + 1]["gas_price"]
-            for i, tx in enumerate(block.transactions[:-1])
+            tx.gasPrice >= transactions[i + 1].gasPrice
+            for i, tx in enumerate(transactions[:-1])
         )
     else:  # Post-London Hard Fork (EIP-1559)
         ordered = all(
             (
                 (
-                    tx.get("max_priority_fee_per_gas", 0) + block.base_fee_per_gas
+                    tx.maxPriorityFeePerGas + block.baseFeePerGas
                 )
                 <= (
-                    block.transactions[i + 1].get("max_priority_fee_per_gas", 0) +
-                    block.base_fee_per_gas
+                    transactions[i + 1].maxPriorityFeePerGas +
+                    block.baseFeePerGas
                 )
-                if tx["type"] == 2 and block.transactions[i + 1]["type"] == 2
-                else tx["gas_price"] >= block.transactions[i + 1]["gas_price"]
+                if tx.type == 2 and transactions[i + 1].type == 2
+                else tx.gasPrice >= transactions[i + 1].gasPrice
             )
-            for i, tx in enumerate(block.transactions[:-1])
+            for i, tx in enumerate(transactions[:-1])
         )
 
     return ordered
@@ -78,4 +67,3 @@ if __name__ == "__main__":
 			print( f"Block {block_num} is ordered" )
 		else:
 			print( f"Block {block_num} is ordered" )
-
